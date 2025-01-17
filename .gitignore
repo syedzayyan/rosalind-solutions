@@ -1,0 +1,35 @@
+# ChatJibbity Generated This
+
+# Ignore all files without extensions (optional, use with caution)
+*.
+
+# Ignore specific compiled binaries
+my_program  # Replace with the actual binary names if known
+
+# Ignore binaries in specific build directories
+/build/
+bin/
+obj/
+
+# Ignore temporary build artifacts
+*.o
+*.so
+*.a
+*.dylib
+*.out
+*.exe
+
+# macOS-specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+_*
+
+# Editor temp files
+*~
+*.swp
+*.swo
+
+# Ignore everything in build directory but keep the folder
+build/*
+!build/.gitkeep
