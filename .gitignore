@@ -33,3 +33,6 @@ _*
 # Ignore everything in build directory but keep the folder
 build/*
 !build/.gitkeep
+
+
+*.py
