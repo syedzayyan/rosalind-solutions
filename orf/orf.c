@@ -11,6 +11,11 @@ void print_protein_from_orfs(char *tmp_content, hm *codon_map)
     bool in_orf = false;
     char *start_pos = tmp_content;  // Keep track of where we started
 
+    char tempCodon[strlen(tmp_content)];
+    int tempCodonIdx;
+    BTNode* root = NULL;
+    size_t sizeStr = strlen(tmp_content);
+
     while (*tmp_content)
     {
         char codon[4];
@@ -33,9 +38,11 @@ void print_protein_from_orfs(char *tmp_content, hm *codon_map)
             if (strncmp(codon, "UAG", 3) == 0 || strncmp(codon, "UGA", 3) == 0 || strncmp(codon, "UAA", 3) == 0)
             {
                 // End of current ORF
-                printf("\n");
                 in_orf = false; // Reset ORF state
                 tmp_content = start_pos + 1;
+                tempCodon[tempCodonIdx] = '\0';
+                root = add(root, tempCodon, strlen(tempCodon) + 1, compareString);
+                tempCodonIdx = 0;
                 continue;
             }
 
@@ -43,7 +50,8 @@ void print_protein_from_orfs(char *tmp_content, hm *codon_map)
             char *amino = hm_get(codon_map, codon);
             if (amino)
             {
-                printf("%s", amino); // Print the amino acid
+                tempCodon[tempCodonIdx] = *amino;
+                tempCodonIdx++;
             }
             else
             {
@@ -57,10 +65,8 @@ void print_protein_from_orfs(char *tmp_content, hm *codon_map)
         // Move to the next nucleotide if not in an ORF
         tmp_content++;
     }
-    if (in_orf)
-    {
-        printf("\n");
-    }
+    inOrderTraversalPrintString(root);
+    printf("\n");
 }
 
 
@@ -128,7 +134,6 @@ int main()
     dna_to_rna(complementary);
 
     print_protein_from_orfs(normal_strand, codon_map);
-    // printf("\n");
     print_protein_from_orfs(complementary, codon_map);
 
     free(complementary);
