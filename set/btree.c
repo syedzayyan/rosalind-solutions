@@ -2,64 +2,44 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include "btree.h"
 
-typedef struct BTNode {
-    int key;
-    struct BTNode *left, *right;
-} BTNode;
-
-BTNode* createNode(int value){
+BTNode* createNode(void* value, size_t data_size){
     struct BTNode* temp = (BTNode*)malloc(sizeof(BTNode));
-    temp->key = value;
+    temp->data = malloc(data_size);
+    memcpy(temp->data, value, data_size);
     temp->left = temp->right = NULL;
     return temp;
 }
 
-BTNode* searchNode(BTNode* root, int target){
-    if (root == NULL || root->key == target){
-        return root;
+BTNode* contains(BTNode* root, void* target, int (*compare)(void*, void*)){
+    if (root == NULL){
+        return NULL;
     } 
-    if (root->key < target){
-        return searchNode(root->right, target);
+    int cmp = compare(target, root->data);
+    if (cmp == 0) {
+        return root;
+    } else if (cmp < 0) {
+        return contains(root->left, target, compare);
     }
-    return searchNode(root->left, target);
+    return contains(root->right, target, compare);
 }
-BTNode* insertNode(BTNode* node, int value){
+BTNode* add(BTNode* node, void* value, size_t data_size, int(*compare)(void*, void*)){
     if (node == NULL){
-        return createNode(value);
+        return createNode(value, data_size);
     }
-    if (value < node->key) {
-        node->left = insertNode(node->left, value);
+    // Digressing from B-Tree to set as values need to be compared before being put in
+    int cmp = compare(value, node->data);
+    if (cmp < 0) {
+        node->left = add(node->left, value, data_size, compare);
     }
-    else if (value > node->key){
-        node->right = insertNode(node->right, value);
+    else if (cmp > 0){
+        node->right = add(node->right, value, data_size, compare);
     }
     return node;
 }
 
-void postOrderTraversal(BTNode* root){
-    if (root != NULL){
-        postOrderTraversal(root->left);
-        postOrderTraversal(root->right);
-        printf("%d\n", root->key);
-    }
-}
-
-void inOrder(BTNode* root){
-    if (root != NULL){
-        inOrder(root->left);
-        printf("%d\n", root->key);
-        inOrder(root->right);
-    }
-}
-
-void preOrder(BTNode* root){
-    if (root != NULL){
-        printf("%d", root->key);
-        preOrder(root->left);
-        preOrder(root->right);
-    }
-}
 
 BTNode* findMinimum(BTNode* root){
     if (root == NULL) {
@@ -70,15 +50,17 @@ BTNode* findMinimum(BTNode* root){
     return root;
 }
 
-BTNode* delete(BTNode* root, int val) {
+BTNode* deleteNode(BTNode* root, void* val, int (*compare)(void*, void*), size_t data_size) {
     if (root == NULL) return NULL;
+    int cmp = compare(val, root->data);
 
-    if (val > root->key) {
-        root->right = delete(root->right, val);
-    } else if (val < root->key){
-        root->left = delete(root->left, val);
+    if (cmp > 0) {
+        root->right = deleteNode(root->right, val, compare, data_size);
+    } else if (cmp < 0){
+        root->left = deleteNode(root->left, val, compare, data_size);
     } else {
         if (root->left == NULL && root->right == NULL){
+            free(root->data);
             free(root);
             return NULL;
         }else if(root->left == NULL || root->right == NULL){
@@ -88,51 +70,80 @@ BTNode* delete(BTNode* root, int val) {
             }else{
                 temp = root->left;
             }
+            free(root->data);
             free(root);
             return temp;
         }else{
             BTNode* temp = findMinimum(root->right);
-            root->key = temp->key;
-            root->right = delete(root->right, temp->key);
+            memcpy(root->data, temp->data, data_size);
+            root->right = deleteNode(root->right, temp->data, compare, data_size);
         }
     }
     return root;
 }
 
-int main(){
-    BTNode* root = NULL;
-    root = insertNode(root, 50);
-    insertNode(root, 30);
-    insertNode(root, 20);
-    insertNode(root, 40);
-    insertNode(root, 70);
-    insertNode(root, 60);
-    insertNode(root, 80);
-
-    // Search for a node with key 60
-    if (searchNode(root, 60) != NULL) {
-        printf("60 found");
+void inOrderTraversalPrintString(BTNode* root) {
+    if (root == NULL) {
+        return;
     }
-    else {
-        printf("60 not found");
-    }
-
-    printf("\n");
-
-    // Perform post-order traversal
-    postOrderTraversal(root);
-    printf("\n");
-
-    // Perform pre-order traversal
-    preOrder(root);
-    printf("\n");
-
-    // Perform in-order traversal
-    inOrder(root);
-    printf("\n");
-
-    // Perform delete the node (70)
-    BTNode* temp = delete (root, 70);
-    printf("After Delete: \n");
-    inOrder(root);
+    inOrderTraversalPrintString(root->left);
+    printf("%s\n", (char*)root->data);
+    inOrderTraversalPrintString(root->right);
 }
+
+int compareInt(void* a, void* b) {
+    int intA = *(int*)a;
+    int intB = *(int*)b;
+    if (intA < intB) return -1;
+    if (intA > intB) return 1;
+    return 0;
+}
+
+int compareString(void* a, void* b) {
+    return strcmp((char*)a, (char*)b);
+}
+
+// int main(){
+//     BTNode* root = NULL;
+
+//     int values[] = {50, 30, 20, 40, 70, 60, 80};
+//     size_t size = sizeof(int);
+
+//     for (int i = 0; i < 7; i++) {
+//         root = add(root, &values[i], size, compareInt);
+//     }
+
+//     int searchVal = 60;
+//     if (contains(root, &searchVal, compareInt) != NULL) {
+//         printf("60 is in the set\n");
+//     } else {
+//         printf("60 is not in the set\n");
+//     }
+
+//     // Test with strings
+//     BTNode* rootStr = NULL;
+//     char* strings[] = {"apple", "banana", "cherry", "date", "fig", "grape"};
+//     size_t sizeStr = sizeof(char*);
+
+//     for (int i = 0; i < 6; i++) {
+//         rootStr = add(rootStr, strings[i], strlen(strings[i]) + 1, compareString);
+//     }
+
+//     char* searchStr = "cherry";
+//     if (contains(rootStr, searchStr, compareString) != NULL) {
+//         printf("\"cherry\" is in the set\n");
+//     } else {
+//         printf("\"cherry\" is not in the set\n");
+//     }
+
+//     // Test deleting strings
+//     rootStr = delete(rootStr, "banana", compareString, sizeStr);
+//     searchStr = "banana";
+//     if (contains(rootStr, searchStr, compareString) != NULL) {
+//         printf("\"banana\" is in the set\n");
+//     } else {
+//         printf("\"banana\" is not in the set\n");
+//     }
+
+//     return 0;
+// }

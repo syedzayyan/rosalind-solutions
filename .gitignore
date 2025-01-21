@@ -1,7 +1,9 @@
 # ChatJibbity Generated This
 
-# Ignore all files without extensions (optional, use with caution)
-*.
+# Ignore all
+*
+# Unignore all with extensions
+!*.*
 
 # Ignore specific compiled binaries
 my_program  # Replace with the actual binary names if known
