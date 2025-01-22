@@ -1,8 +1,8 @@
 # ChatJibbity Generated This
 
-# Ignore all
-*
 # Unignore all with extensions
+*
+!/**/
 !*.*
 
 # Ignore specific compiled binaries
@@ -20,6 +20,7 @@ obj/
 *.dylib
 *.out
 *.exe
+*.dSYM/
 
 # macOS-specific files
 .DS_Store

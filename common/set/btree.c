@@ -6,7 +6,7 @@
 #include "btree.h"
 
 BTNode* createNode(void* value, size_t data_size){
-    struct BTNode* temp = (BTNode*)malloc(sizeof(BTNode));
+    BTNode* temp = (BTNode*)malloc(sizeof(BTNode));
     temp->data = malloc(data_size);
     memcpy(temp->data, value, data_size);
     temp->left = temp->right = NULL;
