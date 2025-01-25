@@ -1,6 +1,6 @@
 #include "../../common.h"
 
-hm* fasta_file_reader(const char *filename) {
+hashmap* fasta_file_reader(const char *filename) {
     char *fast_files = file_to_char(filename);
     if (fast_files == NULL) {
         fprintf(stderr, "Failed to read file.\n");
@@ -8,7 +8,7 @@ hm* fasta_file_reader(const char *filename) {
     }
 
     // Create the hashmap
-    hm* map = hm_create();
+    hashmap* map = hashmap_create();
     if (map == NULL) {
         fprintf(stderr, "Failed to create hashmap.\n");
         free(fast_files);
@@ -53,7 +53,7 @@ hm* fasta_file_reader(const char *filename) {
         if (sequence == NULL) {
             fprintf(stderr, "Memory allocation failed.\n");
             free(content);
-            ht_delete(map);
+            hashmap_delete(map);
             return NULL;
         }
 
@@ -70,7 +70,7 @@ hm* fasta_file_reader(const char *filename) {
         *seq_ptr = '\0';  // Null-terminate the sequence
 
         // Store the identifier and sequence in the hashmap
-        hm_set(map, identifier, sequence);
+        hashmap_set(map, identifier, sequence, sequence_length + 1);
 
         // Move to the next sequence
         content = next_fasta;

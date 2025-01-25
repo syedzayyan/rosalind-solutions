@@ -55,7 +55,7 @@ void delete_graph(Graph* g) {
     free(g);
 }
 
-void add_node(Graph* g, void* node_data, size_t node_size){
+int add_node_to_graph(Graph* g, void* node_data, size_t node_size){
     int curr_node_idx = g->v_n;
     g->nodes_list = realloc(g->nodes_list, sizeof(struct nodes) * (curr_node_idx + 1));
     assert(g->nodes_list);
@@ -71,9 +71,10 @@ void add_node(Graph* g, void* node_data, size_t node_size){
     g->nodes_list[curr_node_idx].list = NULL;   // Outgoing edge list is NULL initially
 
     g->v_n++;
+    return curr_node_idx;
 }
 
-void add_edge(Graph* g, int u, int v, void* edge_data, size_t edge_data_size){
+void add_edge_to_graph(Graph* g, int u, int v, void* edge_data, size_t edge_data_size){
     // Just check input stuff isn't garbage
     assert(u >= 0 && u < g->v_n);
     assert(v >= 0 && v < g->v_n);

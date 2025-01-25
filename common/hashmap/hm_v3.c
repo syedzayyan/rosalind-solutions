@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <assert.h>
-#include "hm.h"
+#include "hm_v3.h"
 
 // Hash Function - FNV-1a hash algorithm
 #define FNV_OFFSET 14695981039346656037UL
@@ -27,7 +27,7 @@ typedef struct {
 } entries_in_hm;
 
 
-struct hm {
+struct hashmap {
     entries_in_hm* entries;
     size_t capacity;
     size_t len;
@@ -35,15 +35,15 @@ struct hm {
 
 #define INITIAL_CAPACITY 16
 
-hm* hm_create(void) {
+hashmap* hashmap_create(void) {
     // Allocation of space for hash table with NULL Values
-    hm* map = calloc(1, sizeof(hm));
+    hashmap* map = calloc(1, sizeof(hashmap));
     if (map == NULL) {
         return NULL;
     }
     map->len = 0;
     map->capacity = INITIAL_CAPACITY;
-    map->entries = calloc(map->capacity, sizeof(hm));
+    map->entries = calloc(map->capacity, sizeof(hashmap));
 
     if (map->entries == NULL) {
         free(map);
@@ -52,15 +52,16 @@ hm* hm_create(void) {
     return map;
 }
 
-void ht_delete(hm* map) {
+void hashmap_delete(hashmap* map) {
     for (size_t i = 0; i < map->capacity; i++) {
         free((void*)map->entries[i].key);
+        free(map->entries[i].value);
     }
     free(map->entries);
     free(map);
 }
 
-void hm_delete_kv(hm* map, const char* key) {
+void hashamp_delete_kv(hashmap* map, const char* key) {
     uint64_t hash = key_hasher(key);
     size_t idx = (size_t)(hash & (uint64_t)(map->capacity - 1));
     size_t start_idx = idx; // To detect full loop
@@ -91,6 +92,7 @@ void hm_delete_kv(hm* map, const char* key) {
                 // Step 4: Shift the next entry into the current one
                 map->entries[idx] = map->entries[next_idx];
                 map->entries[next_idx].key = NULL;
+                map->entries[next_idx].value = NULL;
                 idx = next_idx;
                 next_idx = (idx + 1) & (map->capacity - 1);
             }
@@ -109,7 +111,7 @@ void hm_delete_kv(hm* map, const char* key) {
 }
 
 
-void* hm_get(hm* map, const char* key) {
+void* hashmap_get(hashmap* map, const char* key) {
     uint64_t hash = key_hasher(key);
     size_t idx = (size_t)(hash & (uint64_t)(map->capacity - 1));
     size_t start_idx = idx; // To detect full loop
@@ -127,7 +129,7 @@ void* hm_get(hm* map, const char* key) {
     return NULL;
 }
 
-static const char* hm_set_entry(entries_in_hm* entries, size_t capacity, const char* key, void* value, size_t* plen) {
+static const char* hashmap_set_entry(entries_in_hm* entries, size_t capacity, const char* key, void* value, size_t size_of_value, size_t* plen) {
     uint64_t hash = key_hasher(key);
     size_t idx = (size_t)(hash & (uint64_t)(capacity - 1));
     size_t pd = 0;
@@ -171,12 +173,19 @@ static const char* hm_set_entry(entries_in_hm* entries, size_t capacity, const c
     }
 
     entries[idx].key = (char*)key;
-    entries[idx].value = value;
+
+    // If we have some value passed in, hashmap needs its own copy and user will need free their supplied data in case they forget
+    void* new_value = malloc(size_of_value);
+    if (new_value == NULL) {
+        return NULL;
+    }
+    memcpy(new_value, value, size_of_value);
+    entries[idx].value = new_value;
     entries[idx].pd = pd;
     return key;
 }
 
-static bool hm_expand(hm* map) {
+static bool hm_expand(hashmap* map) {
     size_t new_cap = map->capacity * 2;
     if (new_cap < map->capacity) {
         return false;
@@ -190,7 +199,7 @@ static bool hm_expand(hm* map) {
     for (size_t i = 0; i < map->capacity; i++) {
         entries_in_hm entry = map->entries[i];
         if (entry.key != NULL) {
-            hm_set_entry(new_entries, new_cap, entry.key, entry.value, NULL);
+            hashmap_set_entry(new_entries, new_cap, entry.key, entry.value, 0, NULL);
         }
     }
 
@@ -204,7 +213,7 @@ static bool hm_expand(hm* map) {
 // moving around memory and stuffh
 
 
-const char* hm_set(hm* map, const char* key, void* value) {
+const char* hashmap_set(hashmap* map, const char* key, void* value, size_t value_size) {
     assert(value != NULL);
     if (value == NULL) {
         return NULL;
@@ -216,22 +225,22 @@ const char* hm_set(hm* map, const char* key, void* value) {
         }
     }
 
-    return hm_set_entry(map->entries, map->capacity, key, value, &map->len);
+    return hashmap_set_entry(map->entries, map->capacity, key, value, value_size, &map->len);
 }
 
-size_t hm_len(hm* map) {
+size_t hashmap_len(hashmap* map) {
     return map->len;
 }
 
-hmi ht_iter(hm* map) {
-    hmi it;
+hashmap_iti hashmap_iter(hashmap* map) {
+    hashmap_iti it;
     it._map = map;
     it._idx = 0;
     return it;
 }
 
-bool hm_nxt(hmi* im){
-    hm* map = im->_map;
+bool hashmap_nxt(hashmap_iti* im){
+    hashmap* map = im->_map;
     while (im->_idx < map->capacity) {
         size_t i = im->_idx;
         im->_idx++;

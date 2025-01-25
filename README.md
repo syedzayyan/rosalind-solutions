@@ -10,3 +10,6 @@ I am solving the problems on [Rosalind](https://rosalind.info/problems/list-view
 The code is structured in folders with a common.c and common.h file thing at the top. The "common" folder contains some common data structure that I needed to implement to do basically anything in C. Well to be fair I did say I wanted to do these anyway so it's kinda my fault.
 
 The make file takes in a filename, so at the root type in something like `make overlap_graph/og.c` and then things get compiled. You run the program and magic preferably happens.
+
+### Whats in the Common Folder
+Since C practically has nothing in it's standard library, I needed to implement all sorts of things. Dictionaries? What's that. Sets? Make your own. As I go along problem solving I put all my data structure things there. Things may have version twos and three and used all over the place. As I said, I am solving things still and stuff is hard!

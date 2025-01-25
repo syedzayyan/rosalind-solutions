@@ -23,5 +23,5 @@ typedef struct graph {
 
 Graph* create_graph(int v_n);
 void delete_graph(Graph* g);
-void add_node(Graph* g, void* node_data, size_t node_size);
-void add_edge(Graph* g, int u, int v, void* edge_data, size_t edge_data_size);
+int add_node_to_graph(Graph* g, void* node_data, size_t node_size);
+void add_edge_to_graph(Graph* g, int u, int v, void* edge_data, size_t edge_data_size);

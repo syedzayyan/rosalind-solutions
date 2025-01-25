@@ -5,4 +5,4 @@
 #include <string.h>
 #include <stdlib.h>
 
-hm* fasta_file_reader(const char *filename);
+hashmap* fasta_file_reader(const char *filename);
