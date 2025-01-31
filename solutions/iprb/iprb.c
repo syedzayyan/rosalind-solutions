@@ -1,7 +1,7 @@
 #include "../../common.h"
 
 double iprb(int k, int m, int n){
-    double i = m * m + 4 * n * n + 4 * m * n - 4 * n - m;
+    double i = (m * m) + (4 * n * n) + (4 * m * n) - (4 * n - m);
     double j = 4 * (k + m + n) * (k + m + n - 1);
     double rst = 1 - i / j;
     return rst;

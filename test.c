@@ -63,7 +63,28 @@ void test_hashmap_functions() {
     hashmap_delete(map);
 }
 
+void test_graphs(){
+    Graph* g = create_graph();
+    int node_data[] = {100, 200, 300, 400, 500};
+    for (int i = 0; i < 5; i++){
+        add_node_to_graph(g, (void*)&node_data[i], sizeof(int));
+    }
+
+    add_edge_to_graph(g, 0, 1, NULL, 0);
+    add_edge_to_graph(g, 1, 3, NULL, 0);
+    add_edge_to_graph(g, 1, 4, NULL, 0);
+    add_edge_to_graph(g, 2, 4, NULL, 0);
+
+    print_adjacency_matrix(g);
+    delete_node_from_graph(g, 1);
+    printf("\n");
+    print_adjacency_matrix(g);
+
+    delete_graph(g);
+}
+
 int main() {
-    test_hashmap_functions();
+    // test_hashmap_functions();
+    test_graphs();
     return 0;
 }
