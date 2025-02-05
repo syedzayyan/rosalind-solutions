@@ -17,6 +17,8 @@
         "tuple": "c",
         "vector": "c",
         "sstream": "c",
-        "__tree": "cpp"
+        "__tree": "cpp",
+        "set": "c",
+        "unordered_map": "c"
     }
 }

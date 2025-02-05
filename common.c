@@ -227,11 +227,13 @@ void reverse_string(char *str) {
 void reverse_complement(const char *seq, char *rev_comp) {
     int length = strlen(seq);
     for (int i = 0; i < length; i++) {
-        switch (seq[length - 1 - i]) {
+        char base = seq[length - 1 - i];
+        switch (base) {
             case 'A': rev_comp[i] = 'T'; break;
             case 'T': rev_comp[i] = 'A'; break;
             case 'C': rev_comp[i] = 'G'; break;
             case 'G': rev_comp[i] = 'C'; break;
+            default:  rev_comp[i] = base;  // Keep unknown characters as-is
         }
     }
     rev_comp[length] = '\0';

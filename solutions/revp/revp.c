@@ -4,20 +4,19 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define MAX_LEN 1000
+#define MAX_LEN 2000
 
 // Function to find reverse palindromes in a DNA sequence
-void find_reverse_palindromes(const char* sequence) {
+void find_reverse_palindromes(const char *sequence) {
     int seq_length = strlen(sequence);
 
     for (int start = 0; start < seq_length; start++) {
         for (int length = 4; length <= 12; length++) {
-            if (start + length > seq_length) break; // Ensure substring is within bounds
+            if (start + length > seq_length) continue; // Ensure substring is within bounds
             
-            char sub_str[MAX_LEN], rev_comp[MAX_LEN];
+            char sub_str[13], rev_comp[13]; // Maximum length is 12 + 1 for '\0'
             strncpy(sub_str, sequence + start, length);
-            sub_str[length] = '\0';
-
+            sub_str[length] = '\0'; // Ensure null termination
             reverse_complement(sub_str, rev_comp);
 
             if (strcmp(sub_str, rev_comp) == 0) {
